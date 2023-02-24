@@ -4,6 +4,9 @@ inputs:
   discordToken:
     description: 'The discord token for the bot user'
     required: true
+  githubToken:
+    description: "The github token. Required for the action's binary to be downloaded"
+    required: true
   markdownDirectory:
     description: 'The directory of where the markdown files are stored'
     required: true
@@ -14,7 +17,7 @@ runs:
     id: download-artifact
     uses: dawidd6/action-download-artifact@v2
     with:
-      github_token: ${{ secrets.GITHUB_TOKEN }}
+      github_token: ${{ inputs.githubToken }}
       workflow: dotnet.yml
       workflow_conclusion: success
       name: MarkdownToDiscord
