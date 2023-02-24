@@ -1,0 +1,22 @@
+name: 'Markdown To Discord'
+description: 'Posts a group of markdown files as Discord messages'
+inputs:
+  discordToken:
+    description: 'The discord token for the bot user'
+    required: true
+  markdownDirectory:
+    description: 'The directory of where the markdown files are stored'
+    required: true
+runs:
+  using: "composite"
+  steps:
+  - name: Download artifact
+    id: download-artifact
+    uses: dawidd6/action-download-artifact@v2
+    with:
+      github_token: ${{ secrets.GITHUB_TOKEN }}
+      workflow: dotnet.yml
+      workflow_conclusion: success
+      name: MarkdownToDiscord
+      repo: LittleBigRefresh/MarkdownToDiscord
+      if_no_artifact_found: fail
