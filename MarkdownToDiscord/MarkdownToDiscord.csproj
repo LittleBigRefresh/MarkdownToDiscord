@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="Discord.Net.Rest" Version="3.9.0" />
+      <PackageReference Include="YamlDotNet" Version="13.0.1" />
     </ItemGroup>
 
 </Project>

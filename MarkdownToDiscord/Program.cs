@@ -61,9 +61,11 @@ foreach (string file in files)
     if(!file.EndsWith(".md")) continue;
     Console.WriteLine("Processing file " + file);
     
-    // TODO: parse md file's front matter for channel id
     List<string> lines = (await File.ReadAllLinesAsync(file)).ToList();
-    IChannel? channel = await client.GetChannelAsync(1078539918642516018);
+    MarkdownParser parser = new(lines);
+    FrontMatter frontMatter = parser.ParseFrontMatter();
+
+    IChannel? channel = await client.GetChannelAsync(frontMatter.ChannelId);
     if (channel == null) throw new InvalidOperationException("Could not find channel by id {id}");
 
     if (channel is IMessageChannel messageChannel)
@@ -72,7 +74,7 @@ foreach (string file in files)
         foreach (IMessage message in messages)
             await message.DeleteAsync();
 
-        await PostMarkdownFile(messageChannel, new MarkdownParser(lines), httpClient);
+        await PostMarkdownFile(messageChannel, parser, httpClient);
     }
 }
 

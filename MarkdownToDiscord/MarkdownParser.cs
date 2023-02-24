@@ -1,5 +1,8 @@
+using System.Diagnostics.Contracts;
 using System.Text.RegularExpressions;
 using MarkdownToDiscord.Elements;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace MarkdownToDiscord;
 
@@ -16,11 +19,17 @@ public partial class MarkdownParser
     [GeneratedRegex(@"!\[([^\]]+)\]\(([^)]+)\)")]
     private static partial Regex ImageRegex();
 
-    private readonly List<string> _lines;
+    private static readonly IDeserializer Deserializer = new DeserializerBuilder()
+        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+        .Build();
 
+    private readonly List<string> _lines;
+    private int _linesToSkip = 0;
+
+    [Pure]
     public IEnumerable<IMarkdownElement> Parse()
     {
-        foreach (string lineImmutable in this._lines)
+        foreach (string lineImmutable in this._lines.Skip(this._linesToSkip))
         {
             string line = lineImmutable;
             IMarkdownElement? element = null;
@@ -53,5 +62,14 @@ public partial class MarkdownParser
             element = new TextMarkdownElement(line);
             yield return element;
         }
+    }
+    
+    public FrontMatter ParseFrontMatter()
+    {
+        int frontMatterIndex = this._lines.IndexOf("---", 1);
+        this._linesToSkip = frontMatterIndex + 1;
+        
+        string frontMatter = string.Join('\n', this._lines.Skip(1).Take(frontMatterIndex - 1));
+        return Deserializer.Deserialize<FrontMatter>(frontMatter);
     }
 }
