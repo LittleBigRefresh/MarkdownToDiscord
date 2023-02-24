@@ -1,0 +1,22 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+    - name: Build
+      run: dotnet build -c Release --no-restore -p:PublishSingleFile=true --self-contained true -r linux-x64
+    - name: Tree
+      run: find .
