@@ -1,48 +1,9 @@
-﻿using System.Text.RegularExpressions;
-using Discord;
+﻿using Discord;
 using Discord.Rest;
+using MarkdownToDiscord;
 using MarkdownToDiscord.Elements;
 
-List<string> lines = File.ReadAllLines("test.md").ToList();
-
-Regex linkRegex = new(@"\[([^\]]+)\]\(([^)]+)\)");
-Regex imageRegex = new(@"!\[([^\]]+)\]\(([^)]+)\)");
-
-List<IMarkdownElement> markdown = new();
-
-foreach (string lineImmutable in lines)
-{
-    string line = lineImmutable;
-    IMarkdownElement? element = null;
-    
-    foreach (Match match in imageRegex.Matches(line))
-    {
-        string altText = match.Groups[1].Value;
-        string linkText = match.Groups[2].Value;
-        
-        element = new ImageMarkdownElement(linkText, altText);
-    }
-
-    if (line.StartsWith("# ")) 
-        element = new HeaderMarkdownElement(line.Substring(2));
-
-    if(element != null)
-    {
-        markdown.Add(element);
-        continue;
-    }
-
-    foreach (Match match in linkRegex.Matches(line))
-    {
-        string altText = match.Groups[1].Value;
-        string linkText = match.Groups[2].Value;
-        
-        line = line.Replace(match.Groups[0].Value, $"{altText}: <{linkText}>");
-    }
-
-    element = new TextMarkdownElement(line);
-    markdown.Add(element);
-}
+MarkdownParser parser = new(File.ReadAllLines("test.md").ToList());
 
 string token = File.ReadAllText("token.txt");
 
@@ -70,7 +31,7 @@ if (channel is IMessageChannel messageChannel)
     httpClient.DefaultRequestHeaders.Add("Accept", "image/*");
     
     string buffer = string.Empty;
-    foreach (IMarkdownElement element in markdown)
+    foreach (IMarkdownElement element in parser.Parse())
     {
         switch (element)
         {
