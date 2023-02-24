@@ -25,7 +25,7 @@ runs:
       if_no_artifact_found: fail
   - name: Execute
     shell: bash
-    run: ./MarkdownToDiscord
+    run: chmod +x ./MarkdownToDiscord && ./MarkdownToDiscord
     env:
       DISCORD_TOKEN: ${{ inputs.discordToken }}
       MARKDOWN_FILES_DIR: ${{ inputs.markdownDirectory }}
