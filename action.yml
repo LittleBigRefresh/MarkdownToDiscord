@@ -23,3 +23,9 @@ runs:
       name: MarkdownToDiscord
       repo: LittleBigRefresh/MarkdownToDiscord
       if_no_artifact_found: fail
+  - name: Execute
+    shell: bash
+    run: ./MarkdownToDiscord
+    env:
+      DISCORD_TOKEN: ${{ inputs.discordToken }}
+      MARKDOWN_FILES_DIR: ${{ inputs.markdownDirectory }}
