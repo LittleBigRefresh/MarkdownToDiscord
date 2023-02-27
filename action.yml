@@ -23,6 +23,9 @@ runs:
       name: MarkdownToDiscord
       repo: LittleBigRefresh/MarkdownToDiscord
       if_no_artifact_found: fail
+  - name: Get modified files
+    shell: bash
+    run: export M2D_GIT_MODIFIED=$(git diff --name-only HEAD^ ${{ inputs.markdownDirectory }})
   - name: Execute
     shell: bash
     run: chmod +x ./MarkdownToDiscord && ./MarkdownToDiscord

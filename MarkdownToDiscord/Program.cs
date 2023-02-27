@@ -9,12 +9,18 @@ string? token = Environment.GetEnvironmentVariable("DISCORD_TOKEN");
 if (token == null) throw new InvalidOperationException("Cannot proceed without a Discord token");
 if (mdPath == null) throw new InvalidOperationException("Cannot proceed without a markdown directory");
 
-string[] files = Directory.GetFiles(mdPath);
+string? gitModified = Environment.GetEnvironmentVariable("M2D_GIT_MODIFIED");
 
-DiscordRestClient client = new(new DiscordRestConfig
+string[]? gitFiles = null;
+if (gitModified != null)
 {
-    LogLevel = LogSeverity.Debug,
-});
+    Console.WriteLine("Git modified data is available!");
+    gitFiles = gitModified.Split('\n', ' ')
+        .Select(Path.GetFullPath)
+        .ToArray();
+}
+
+string[] files = Directory.GetFiles(mdPath);
 
 async Task PostMarkdownFile(IMessageChannel channel, MarkdownParser parser, HttpClient httpClient)
 {
@@ -47,6 +53,11 @@ async Task PostMarkdownFile(IMessageChannel channel, MarkdownParser parser, Http
     }
 }
 
+DiscordRestClient client = new(new DiscordRestConfig
+{
+    LogLevel = LogSeverity.Debug,
+});
+
 #pragma warning disable CS1998
 client.Log += async message => Console.WriteLine(message);
 #pragma warning restore CS1998
@@ -59,6 +70,13 @@ httpClient.DefaultRequestHeaders.Add("Accept", "image/*");
 foreach (string file in files)
 {
     if(!file.EndsWith(".md")) continue;
+
+    if (gitFiles != null && !gitFiles.Contains(file))
+    {
+        Console.WriteLine($"File {file} was not modified by git; skipping.");
+        continue;
+    }
+    
     Console.WriteLine("Processing file " + file);
     
     List<string> lines = (await File.ReadAllLinesAsync(file)).ToList();
