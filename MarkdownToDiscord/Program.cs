@@ -11,17 +11,35 @@ if (mdPath == null) throw new InvalidOperationException("Cannot proceed without 
 
 string? gitModified = Environment.GetEnvironmentVariable("M2D_GIT_MODIFIED");
 
-IEnumerable<string>? gitFiles = null;
+List<string> gitFiles;
 if (gitModified != null)
 {
     Console.WriteLine("Git modified data is available!");
     gitFiles = gitModified.Split('\n', ' ')
         .Where(s => !string.IsNullOrWhiteSpace(s))
-        .Select(Path.GetFullPath);
+        .Select(Path.GetFullPath)
+        .ToList();
+}
+else
+{
+    gitFiles = new List<string>();
 }
 
-IEnumerable<string> files = Directory.GetFiles(mdPath)
-    .Select(Path.GetFullPath);
+List<string> files = Directory.GetFiles(mdPath)
+    .Select(Path.GetFullPath)
+    .ToList();
+
+Console.WriteLine($"{files.Count} files, {gitFiles.Count} modified files");
+
+foreach (string file in files)
+{
+    Console.WriteLine("- Discovered file: " + file);
+}
+
+foreach (string gitFile in gitFiles)
+{
+    Console.WriteLine("- Modified file: " + gitFile);
+}
 
 async Task PostMarkdownFile(IMessageChannel channel, MarkdownParser parser, HttpClient httpClient)
 {
@@ -68,11 +86,13 @@ await client.LoginAsync(TokenType.Bot, token);
 using HttpClient httpClient = new();
 httpClient.DefaultRequestHeaders.Add("Accept", "image/*");
 
+Console.WriteLine("Ready to process files!");
+
 foreach (string file in files)
 {
     if(!file.EndsWith(".md")) continue;
 
-    if (gitFiles != null && !gitFiles.Contains(file))
+    if (gitFiles.Count > 0 && !gitFiles.Contains(file))
     {
         Console.WriteLine($"File {file} was not modified by git; skipping.");
         continue;
