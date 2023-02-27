@@ -11,17 +11,17 @@ if (mdPath == null) throw new InvalidOperationException("Cannot proceed without 
 
 string? gitModified = Environment.GetEnvironmentVariable("M2D_GIT_MODIFIED");
 
-string[]? gitFiles = null;
+IEnumerable<string>? gitFiles = null;
 if (gitModified != null)
 {
     Console.WriteLine("Git modified data is available!");
     gitFiles = gitModified.Split('\n', ' ')
         .Where(s => !string.IsNullOrWhiteSpace(s))
-        .Select(Path.GetFullPath)
-        .ToArray();
+        .Select(Path.GetFullPath);
 }
 
-string[] files = Directory.GetFiles(mdPath);
+IEnumerable<string> files = Directory.GetFiles(mdPath)
+    .Select(Path.GetFullPath);
 
 async Task PostMarkdownFile(IMessageChannel channel, MarkdownParser parser, HttpClient httpClient)
 {
