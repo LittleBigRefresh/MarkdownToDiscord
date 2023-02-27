@@ -16,6 +16,7 @@ if (gitModified != null)
 {
     Console.WriteLine("Git modified data is available!");
     gitFiles = gitModified.Split('\n', ' ')
+        .Where(s => !string.IsNullOrWhiteSpace(s))
         .Select(Path.GetFullPath)
         .ToArray();
 }
