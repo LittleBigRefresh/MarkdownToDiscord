@@ -64,12 +64,12 @@ public partial class MarkdownParser
         }
     }
     
-    public FrontMatter ParseFrontMatter()
+    public MarkdownSettings ParseSettings()
     {
         int frontMatterIndex = this._lines.IndexOf("---", 1);
         this._linesToSkip = frontMatterIndex + 1;
         
         string frontMatter = string.Join('\n', this._lines.Skip(1).Take(frontMatterIndex - 1));
-        return Deserializer.Deserialize<FrontMatter>(frontMatter);
+        return Deserializer.Deserialize<MarkdownSettings>(frontMatter);
     }
 }

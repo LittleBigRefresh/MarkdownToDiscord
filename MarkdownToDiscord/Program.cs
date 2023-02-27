@@ -63,16 +63,19 @@ foreach (string file in files)
     
     List<string> lines = (await File.ReadAllLinesAsync(file)).ToList();
     MarkdownParser parser = new(lines);
-    FrontMatter frontMatter = parser.ParseFrontMatter();
+    MarkdownSettings markdownSettings = parser.ParseSettings();
 
-    IChannel? channel = await client.GetChannelAsync(frontMatter.ChannelId);
+    IChannel? channel = await client.GetChannelAsync(markdownSettings.ChannelId);
     if (channel == null) throw new InvalidOperationException("Could not find channel by id {id}");
 
     if (channel is IMessageChannel messageChannel)
     {
-        await foreach (IReadOnlyCollection<IMessage> messages in messageChannel.GetMessagesAsync(50))
-        foreach (IMessage message in messages)
-            await message.DeleteAsync();
+        if (markdownSettings.ShouldDeleteExistingContents)
+        {
+            await foreach (IReadOnlyCollection<IMessage> messages in messageChannel.GetMessagesAsync(50))
+            foreach (IMessage message in messages)
+                await message.DeleteAsync();
+        }
 
         await PostMarkdownFile(messageChannel, parser, httpClient);
     }
