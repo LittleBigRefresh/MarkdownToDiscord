@@ -4,7 +4,7 @@ const RequestError = error{ NoResponseData, MismatchedContentLength, MissingAuth
 
 pub var authorization: ?[]const u8 = null;
 
-fn request(comptime method: std.http.Method, url: std.Uri, body: []const u8, allocator: std.mem.Allocator) ![]u8 {
+pub fn request(comptime method: std.http.Method, url: std.Uri, body: []const u8, allocator: std.mem.Allocator) ![]u8 {
     var client: std.http.Client = .{ .allocator = allocator };
     defer client.deinit();
 
@@ -38,12 +38,4 @@ fn request(comptime method: std.http.Method, url: std.Uri, body: []const u8, all
     // std.debug.print("Response: {s}\n", .{data});
 
     return data;
-}
-
-pub fn get(url: std.Uri, allocator: std.mem.Allocator) ![]const u8 {
-    return try request(.GET, url, &[0]u8{}, allocator);
-}
-
-pub fn post(url: std.Uri, body: []const u8, allocator: std.mem.Allocator) ![]const u8 {
-    return try request(.POST, url, body, allocator);
 }

@@ -37,7 +37,7 @@ pub fn setToken(token: ?[]const u8, allocator: std.mem.Allocator) !void {
     requests.authorization = authorizationValue;
 }
 
-fn getObject(comptime T: type, comptime endpointFmt: []const u8, args: anytype, allocator: std.mem.Allocator) !T {
+fn fireRequest(comptime method: std.http.Method, comptime endpointFmt: []const u8, args: anytype, body: []const u8, allocator: std.mem.Allocator) ![]const u8 {
     if (endpointFmt[0] != '/') {
         @compileError("Endpoint URL must start with a slash.");
     }
@@ -48,8 +48,12 @@ fn getObject(comptime T: type, comptime endpointFmt: []const u8, args: anytype, 
     var urlString = try std.fmt.allocPrint(allocator, "{s}{s}", .{ apiBaseUrl, endpointUrlString });
     defer allocator.free(urlString);
 
-    // now that we've constructed the url, lets fire a request and try to parse an object from it
-    var data = try requests.get(try std.Uri.parse(urlString), allocator);
+    var data = try requests.request(method, try std.Uri.parse(urlString), body, allocator);
+    return data; // caller is responsible
+}
+
+fn getObject(comptime T: type, comptime endpointFmt: []const u8, args: anytype, allocator: std.mem.Allocator) !T {
+    var data = try fireRequest(.GET, endpointFmt, args, &[0]u8{}, allocator);
     defer allocator.free(data); // yes, we free this here - it's not needed after we parse json
 
     const options: std.json.ParseOptions = .{ .ignore_unknown_fields = true, .allocator = allocator };
@@ -66,4 +70,8 @@ pub fn getChannel(id: u64, allocator: std.mem.Allocator) !DiscordChannel {
 
 pub fn getMessagesInChannel(id: u64, allocator: std.mem.Allocator) ![]DiscordMessage {
     return getObject([]DiscordMessage, "/channels/{d}/messages?limit=100", .{id}, allocator);
+}
+
+pub fn deleteMessage(channelId: u64, messageId: u64, allocator: std.mem.Allocator) !void {
+    _ = try fireRequest(.DELETE, "/channels/{d}/messages/{d}", .{ channelId, messageId }, &[0]u8{}, allocator);
 }
