@@ -1,17 +1,18 @@
 const std = @import("std");
 
+const url = std.Uri.parse("https://discord.com/api/gateway") catch unreachable;
+
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    var allocator = std.heap.GeneralPurposeAllocator(.{}){};
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    var client: std.http.Client = .{ .allocator = allocator.allocator() };
+    defer client.deinit();
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    var req = try client.request(.GET, url, .{ .allocator = allocator.allocator() }, .{});
+    defer req.deinit();
 
-    try bw.flush(); // don't forget to flush!
+    try req.start();
+    try req.wait();
+
+    std.debug.print("Response status: {d}\n", .{req.response.status});
 }
