@@ -1,18 +1,13 @@
 const std = @import("std");
+const requests = @import("requests.zig");
 
-const url = std.Uri.parse("https://discord.com/api/gateway") catch unreachable;
+// const gatewayUrl = std.Uri.parse("https://discord.com/api/gateway") catch unreachable;
+const gatewayUrl = std.Uri.parse("http://localhost:10060") catch unreachable;
 
 pub fn main() !void {
-    var allocator = std.heap.GeneralPurposeAllocator(.{}){};
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    var allocator = gpa.allocator();
 
-    var client: std.http.Client = .{ .allocator = allocator.allocator() };
-    defer client.deinit();
-
-    var req = try client.request(.GET, url, .{ .allocator = allocator.allocator() }, .{});
-    defer req.deinit();
-
-    try req.start();
-    try req.wait();
-
-    std.debug.print("Response status: {d}\n", .{req.response.status});
+    var data = try requests.post(gatewayUrl, "a", allocator);
+    defer allocator.free(data);
 }
