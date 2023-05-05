@@ -1,10 +1,10 @@
 const std = @import("std");
 
-const RequestError = error{ NoResponseData, MismatchedContentLength, MissingBotToken };
+const RequestError = error{ NoResponseData, MismatchedContentLength, MissingAuthorization };
 
-pub var token: ?[]const u8 = null;
+pub var authorization: ?[]const u8 = null;
 
-fn request(comptime method: std.http.Method, comptime url: std.Uri, body: []const u8, allocator: std.mem.Allocator) ![]u8 {
+fn request(comptime method: std.http.Method, url: std.Uri, body: []const u8, allocator: std.mem.Allocator) ![]u8 {
     var client: std.http.Client = .{ .allocator = allocator };
     defer client.deinit();
 
@@ -17,13 +17,11 @@ fn request(comptime method: std.http.Method, comptime url: std.Uri, body: []cons
         try req.headers.append("Content-Length", contentLengthHeaderValue);
     }
 
-    if (token == null) {
-        return RequestError.MissingBotToken;
+    if (authorization == null) {
+        return RequestError.MissingAuthorization;
     }
 
-    var authorizationValue = try std.fmt.allocPrint(allocator, "Bot {?s}", .{token});
-    defer allocator.free(authorizationValue);
-    try req.headers.append("Authorization", authorizationValue);
+    try req.headers.append("Authorization", authorization.?);
 
     // Comply with discord user-agent regulation: https://discord.com/developers/docs/reference#user-agent-user-agent-example
     try req.headers.append("User-Agent", "DiscordBot (https://github.com/LittleBigRefresh/MarkdownToDiscord, 0.0.0)");
@@ -34,18 +32,18 @@ fn request(comptime method: std.http.Method, comptime url: std.Uri, body: []cons
     try req.writeAll(body);
     try req.wait();
 
-    std.debug.print("Response status: {d}, content length is {?d} bytes\n", .{ req.response.status, req.response.content_length });
+    // std.debug.print("Response status: {d}, content length is {?d} bytes\n", .{ req.response.status, req.response.content_length });
 
     var data: []u8 = try req.reader().readAllAlloc(allocator, 16384);
-    std.debug.print("Response: {s}\n", .{data});
+    // std.debug.print("Response: {s}\n", .{data});
 
     return data;
 }
 
-pub fn get(comptime url: std.Uri, allocator: std.mem.Allocator) ![]const u8 {
+pub fn get(url: std.Uri, allocator: std.mem.Allocator) ![]const u8 {
     return try request(.GET, url, &[0]u8{}, allocator);
 }
 
-pub fn post(comptime url: std.Uri, body: []const u8, allocator: std.mem.Allocator) ![]const u8 {
+pub fn post(url: std.Uri, body: []const u8, allocator: std.mem.Allocator) ![]const u8 {
     return try request(.POST, url, body, allocator);
 }
