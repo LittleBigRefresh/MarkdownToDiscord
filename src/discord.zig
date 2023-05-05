@@ -11,6 +11,18 @@ const DiscordChannel = struct {
     name: []const u8,
 };
 
+const DiscordMessage = struct {
+    id: u64,
+    author: DiscordUser,
+    content: []const u8,
+};
+
+const DiscordUser = struct {
+    id: u64,
+    username: []const u8,
+    discriminator: u14,
+};
+
 const apiBaseUrl: []const u8 = "https://discord.com/api/v10";
 
 pub fn setToken(token: ?[]const u8, allocator: std.mem.Allocator) !void {
@@ -50,4 +62,8 @@ fn getObject(comptime T: type, comptime endpointFmt: []const u8, args: anytype, 
 
 pub fn getChannel(id: u64, allocator: std.mem.Allocator) !DiscordChannel {
     return getObject(DiscordChannel, "/channels/{d}", .{id}, allocator);
+}
+
+pub fn getMessagesInChannel(id: u64, allocator: std.mem.Allocator) ![]DiscordMessage {
+    return getObject([]DiscordMessage, "/channels/{d}/messages?limit=100", .{id}, allocator);
 }

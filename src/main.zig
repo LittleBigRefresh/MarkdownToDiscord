@@ -7,6 +7,11 @@ pub fn main() !void {
 
     try discord.setToken(std.os.getenv("DISCORD_TOKEN"), allocator);
 
-    var channel = try discord.getChannel(1102426423240691712, allocator);
-    std.debug.print("id: {d}, type: {d}, name: '#{s}'\n", .{ channel.id, channel.type, channel.name });
+    var channel = try discord.getChannel(1049225857350254632, allocator);
+    std.debug.print("channel id: {d}, type: {d}, name: '#{s}'\n", .{ channel.id, channel.type, channel.name });
+
+    var messages = try discord.getMessagesInChannel(channel.id, allocator);
+    for (messages) |message| {
+        std.debug.print("message id: {d}, author: {s}#{d} ({d}), content: '{s}'\n", .{ message.id, message.author.username, message.author.discriminator, message.author.id, message.content });
+    }
 }

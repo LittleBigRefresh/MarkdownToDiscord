@@ -34,7 +34,7 @@ fn request(comptime method: std.http.Method, url: std.Uri, body: []const u8, all
 
     // std.debug.print("Response status: {d}, content length is {?d} bytes\n", .{ req.response.status, req.response.content_length });
 
-    var data: []u8 = try req.reader().readAllAlloc(allocator, 16384);
+    var data: []u8 = try req.reader().readAllAlloc(allocator, 65536);
     // std.debug.print("Response: {s}\n", .{data});
 
     return data;
