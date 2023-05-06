@@ -60,8 +60,8 @@ pub fn waitForRatelimitIfNecessary() void {
         if (bucket == null) unreachable;
 
         if (bucket.?.remaining <= 1) {
-            const msToSleep: i64 = @intCast(i64, bucket.?.reset) - currentTime + 100;
-            if (msToSleep < 0) @panic("Using negative value to sleep");
+            const msToSleep: i64 = @max(@intCast(i64, bucket.?.reset) - currentTime + 100, 1000);
+            if (msToSleep < 0) @panic("Tried using negative value to sleep");
 
             std.debug.print("Sleeping for {d}ms because bucket {s} has {d} remaining\n", .{ msToSleep, bucketKey.?.*, bucket.?.remaining });
 

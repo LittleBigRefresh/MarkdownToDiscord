@@ -35,10 +35,22 @@ pub fn request(comptime method: std.http.Method, url: std.Uri, body: []const u8,
 
     // std.debug.print("Response status: {d}, content length is {?d} bytes\n", .{ req.response.status, req.response.content_length });
 
+    // FIXME: This keeps getting hit, and I'm not sure why.
+    if (req.response.status == .too_many_requests) {
+        std.debug.print("\n - !!!! HIT RATELIMIT! !!!! - \n\n", .{});
+
+        // Update where we are on the rate-limit and wait for it to expire.
+        try ratelimit.handleRatelimitBucket(req, allocator);
+        ratelimit.waitForRatelimitIfNecessary();
+
+        std.debug.print("Trying that request again...\n", .{});
+
+        // FIXME: could cause stack overflow
+        return request(method, url, body, allocator);
+    }
+
     var data: []u8 = try req.reader().readAllAlloc(allocator, 65536);
     // std.debug.print("Response: {s}\n", .{data});
-
-    if (req.response.status == .too_many_requests) std.debug.print("\n - !!!! HIT RATELIMIT! !!!! - \n\n", .{});
 
     try ratelimit.handleRatelimitBucket(req, allocator);
     ratelimit.waitForRatelimitIfNecessary();
