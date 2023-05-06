@@ -12,7 +12,7 @@ pub fn main() !void {
 
     var messages = try discord.getMessagesInChannel(channel.id, allocator);
     for (messages) |message| {
-        std.debug.print("message id: {d}, author: {s}#{d} ({d}), content: '{s}'\n", .{ message.id, message.author.username, message.author.discriminator, message.author.id, message.content });
+        // std.debug.print("message id: {d}, author: {s}#{d} ({d}), content: '{s}'\n", .{ message.id, message.author.username, message.author.discriminator, message.author.id, message.content });
         try discord.deleteMessage(channel.id, message.id, allocator);
     }
 }
