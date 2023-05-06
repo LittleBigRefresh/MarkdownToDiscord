@@ -33,7 +33,7 @@ pub fn request(comptime method: std.http.Method, url: std.Uri, body: []const u8,
     try req.writeAll(body);
     try req.wait();
 
-    // std.debug.print("Response status: {d}, content length is {?d} bytes\n", .{ req.response.status, req.response.content_length });
+    std.debug.print("{d} {?s} - {s} {s}\n", .{ @enumToInt(req.response.status), req.response.status.phrase(), @tagName(method), url.path });
 
     // FIXME: This keeps getting hit, and I'm not sure why.
     if (req.response.status == .too_many_requests) {
