@@ -42,8 +42,11 @@ public partial class MarkdownParser
                 element = new ImageMarkdownElement(linkText, altText);
             }
 
-            if (line.StartsWith("# ")) 
-                element = new HeaderMarkdownElement(line.Substring(2));
+            if (line.StartsWith('#'))
+            {
+                int depth = line.LastIndexOf('#') + 1;
+                element = new HeaderMarkdownElement(depth, line.Substring(depth));
+            }
 
             if(element != null)
             {

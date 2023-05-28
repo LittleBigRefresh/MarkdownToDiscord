@@ -50,7 +50,7 @@ async Task PostMarkdownFile(IMessageChannel channel, MarkdownParser parser, Http
         {
             case HeaderMarkdownElement headerElement:
                 if (!string.IsNullOrWhiteSpace(buffer)) await channel.SendMessageAsync(buffer);
-                buffer = $"**{headerElement.Text}**\n";
+                buffer = $"{new string('#', headerElement.Depth)} {headerElement.Text}\n";
                 break;
             case TextMarkdownElement textElement:
                 buffer += textElement.Text + '\n';
