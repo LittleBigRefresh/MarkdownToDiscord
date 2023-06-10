@@ -92,7 +92,7 @@ foreach (string file in files)
 {
     if(!file.EndsWith(".md")) continue;
 
-    if (gitFiles.Count > 0 && !gitFiles.Contains(file))
+    if (gitModified != null && !gitFiles.Contains(file))
     {
         Console.WriteLine($"File {file} was not modified by git; skipping.");
         continue;
