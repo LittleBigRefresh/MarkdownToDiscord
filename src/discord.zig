@@ -56,10 +56,7 @@ fn getObject(comptime T: type, comptime endpointFmt: []const u8, args: anytype, 
     var data = try fireRequest(.GET, endpointFmt, args, &[0]u8{}, allocator);
     defer allocator.free(data); // yes, we free this here - it's not needed after we parse json
 
-    const options: std.json.ParseOptions = .{ .ignore_unknown_fields = true, .allocator = allocator };
-
-    var jsonStream = std.json.TokenStream.init(data);
-    const object = try std.json.parse(T, &jsonStream, options);
+    const object = try std.json.parseFromSlice(T, allocator, data, .{ .ignore_unknown_fields = true });
 
     return object;
 }
