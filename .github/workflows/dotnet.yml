@@ -22,5 +22,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: MarkdownToDiscord
-        path: ./MarkdownToDiscord/bin/Release/net7.0/linux-x64/publish/MarkdownToDiscord
+        path: ./MarkdownToDiscord/bin/Release/net9.0/linux-x64/publish/MarkdownToDiscord
         if-no-files-found: error
