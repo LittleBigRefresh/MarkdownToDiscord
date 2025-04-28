@@ -11,15 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: 9.0.x
     - name: Build
       run: dotnet publish MarkdownToDiscord -c Release -p:PublishSingleFile=true --self-contained true -r linux-x64
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v4
       with:
         name: MarkdownToDiscord
         path: ./MarkdownToDiscord/bin/Release/net7.0/linux-x64/publish/MarkdownToDiscord
